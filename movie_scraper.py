@@ -6,7 +6,7 @@ import pickle
 from bs4 import BeautifulSoup
 
 
-### --- Scraping the movie data --- ###
+### --- Function to scrape the movie names  --- ###
 
 
 # # Defining URL and requesting data
@@ -36,13 +36,16 @@ from bs4 import BeautifulSoup
 # with open('movies.txt', 'wb') as movie_file:
 #     pickle.dump(movie_names, movie_file)
 
-# Unpickling movie name file
-with open('movies.txt', 'rb') as movie_file:
-    movie_names = pickle.load(movie_file)
 
-# Counting how many movie reviews have already been scraped
-path, dirs, files = next(os.walk("./review_dfs"))
-file_count = len(files)
+### --- Function to find next movie to scrape in review_scraper file --- ###
 
-# Movie to scrape next
-print(movie_names[file_count])
+
+def get_next_movie():
+    # Unpickling movie name file
+    with open('movies.txt', 'rb') as movie_file:
+        movie_names = pickle.load(movie_file)
+    
+    file_count = len(os.listdir('./review_dfs'))
+
+    # Returning the movie to next scrape
+    return movie_names[file_count]
