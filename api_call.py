@@ -25,3 +25,6 @@ def search_for_movie(searchterm):
     url  = result['movies'][0]['url']
     name = result['movies'][0]['name']
     return name, url
+
+    search_for_movie('the texas chainsaw massacre')
+    print(url)
