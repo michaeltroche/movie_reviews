@@ -6,35 +6,40 @@ import pickle
 from bs4 import BeautifulSoup
 
 
-### --- Function to scrape the movie names  --- ###
+## --- Scraping the movie names and years of release  --- ###
 
+if __name__ == '__main__':
+    # Defining URL and requesting data
+    url      = 'https://www.imdb.com/list/ls063133606/'
+    response = requests.get(url)
 
-# # Defining URL and requesting data
-# url      = 'https://www.imdb.com/list/ls063133606/'
-# response = requests.get(url)
+    # Brewing the soup
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-# # Brewing the soup
-# soup = BeautifulSoup(response.text, 'html.parser')
+    # Parsing the movie info
+    movie_all   = soup.find_all('div', {'class': 'lister-item mode-detail'})
 
-# # Parsing the film titles
-# movie_all   = soup.find_all('div', {'class': 'lister-item mode-detail'})
-# movie_names = []
-# # Looping through every movie entry
-# for movie in movie_all:
-#     title_full = movie.find('h3', {'class': 'lister-item-header'}).text
-#     title_full = title_full.split('\n')
-#     title      = title_full[2]
-    
-#     # Appending the movie titles to movie_names
-#     movie_names.append(title)
+    # Looping over every movie to parse the name and year
+    movie_names = []
+    movie_years = []
+    for movie in movie_all:
+        title_full = movie.find('h3', {'class': 'lister-item-header'}).text
+        title_full = title_full.split('\n')
+        title      = title_full[2]
+
+        year_full = movie.find('span', {'class': 'lister-item-year'}).text
+        year      = year_full[1:5]
+
+        movie_names.append(title)
+        movie_years.append(year)
 
 
 ### --- Pickling the data for further use to prevent having to re-scrape code --- ###
 
 
-# # Pickling
-# with open('movies.txt', 'wb') as movie_file:
-#     pickle.dump(movie_names, movie_file)
+# Pickling
+with open('movies.pkl', 'wb') as movie_file:
+    pickle.dump([movie_names, movie_years], movie_file)
 
 
 ### --- Function to find next movie to scrape in review_scraper file --- ###
@@ -42,10 +47,10 @@ from bs4 import BeautifulSoup
 
 def get_next_movie():
     # Unpickling movie name file
-    with open('movies.txt', 'rb') as movie_file:
-        movie_names = pickle.load(movie_file)
+    with open('movies.pkl', 'rb') as movie_file:
+        movie_names, movie_years = pickle.load(movie_file)
     
     file_count = len(os.listdir('./review_dfs'))
 
-    # Returning the movie to next scrape
-    return movie_names[file_count]
+    # Returns the next movie to scrape
+    return movie_names[file_count], movie_years[file_count]
