@@ -1,6 +1,12 @@
+### --- This file finds the movie url and name --- ###
+### --- Importing modules --- ###
 from rotten_tomatoes_client import RottenTomatoesClient
 
-def search_for_movie(searchterm):
+
+### --- This function allows vague movie title search and provides the movie name and url --- ###
+
+
+def search_for_movie(search_name, movie_year):
     """
         Send any search term to the RT API.
 
@@ -20,11 +26,21 @@ def search_for_movie(searchterm):
         >>> search_for_movie('Indiana Jones Raiders of the Lost Ark')
         ('Raiders of the Lost Ark', '/m/raiders_of_the_lost_ark')
     """
+    
+    movie_year = int(movie_year)
 
-    result = RottenTomatoesClient.search(term=searchterm, limit=5)
-    url  = result['movies'][0]['url']
-    name = result['movies'][0]['name']
-    return name, url
+    # Provides search results for up to 5 movies
+    result = RottenTomatoesClient.search(term=search_name, limit=10)
 
-    search_for_movie('the texas chainsaw massacre')
-    print(url)
+    # Finding exact movie by using corresponding release year
+    for i in range(len(result['movies'])):
+        if result['movies'][i]['year'] == movie_year:
+            n = i
+            break
+        else:
+            n = 0
+
+    movie_name = result['movies'][n]['name']
+    url_id     = result['movies'][n]['url']
+    
+    return movie_name, url_id
