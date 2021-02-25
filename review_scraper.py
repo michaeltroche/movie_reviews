@@ -12,14 +12,15 @@ import pandas as pd
 import requests
 
 from movie_scraper import get_next_movie 
+from api_call import search_for_movie
 
 
 ### --- get_movie_info function provides the movie id and movie name --- ###
 
 
-def get_movie_info(url):
+def get_movie_info(url_id):
     # Requesting the HTML documentation
-    response = requests.get(url)
+    response = requests.get(f'https://www.rottentomatoes.com/{url_id}/reviews?type=user')
 
     # Searching the HTML doc to extract the movie_id
     html_data  = json.loads(re.search('movieReview\s=\s(.*);', response.text).group(1))
@@ -28,8 +29,10 @@ def get_movie_info(url):
     movie_name = html_data['title']
     movie_name = movie_name.lower().replace(' ','_')
 
+    print(f'Saving name is: {movie_name}')
+
     # Returning movie_id and movie_name
-    return movie_id, movie_name
+    return movie_name, movie_id
 
 
 ### --- get_reviews function flicks through the review pages --- ###
@@ -85,7 +88,7 @@ def get_all_reviews(movie_id):
 ### --- Parsing function that obtains relevant data and puts it into a dataframe --- ###
 
 
-def parse_reviews(movie_id, movie_name):
+def parse_reviews(save_name, movie_id):
     # Getting all reviews
     reviews = get_all_reviews(movie_id)
 
@@ -118,7 +121,7 @@ def parse_reviews(movie_id, movie_name):
 
     # Creating dataframe of reviews
     df = pd.DataFrame(data)
-    df.to_pickle(f'./review_dfs/{movie_name}.pkl')
+    df.to_pickle(f'./review_dfs/{save_name}.pkl')
     return df
 
 
@@ -127,8 +130,12 @@ def parse_reviews(movie_id, movie_name):
 
 if __name__ == '__main__':
     start = time.time()
-    url = 'https://www.rottentomatoes.com/m/cannibal_holocaust/reviews?type=user'
-    movie_id, movie_name = get_movie_info(url)
-    parse_reviews(movie_id, movie_name)
+
+    # Calling functions
+    search_name, movie_year = get_next_movie()
+    movie_name, url_id      = search_for_movie(search_name, int(movie_year))
+    save_name, movie_id     = get_movie_info(url_id)
+    parse_reviews(save_name, movie_id)
+
     end = time.time()
     print(f'Time to run:{(start-end)/3600:.2f} hrs')
