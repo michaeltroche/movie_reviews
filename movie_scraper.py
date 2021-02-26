@@ -7,8 +7,7 @@ from bs4 import BeautifulSoup
 
 
 ## --- Scraping the movie names and years of release  --- ###
-
-if __name__ == '__main__':
+def get_movies():
     # Defining URL and requesting data
     url      = 'https://www.imdb.com/list/ls063133606/'
     response = requests.get(url)
@@ -34,19 +33,17 @@ if __name__ == '__main__':
         movie_years.append(year)
 
 
-### --- Pickling the data for further use to prevent having to re-scrape code --- ###
-
-
-# Pickling
-with open('movies.pkl', 'wb') as movie_file:
-    pickle.dump([movie_names, movie_years], movie_file)
+    ### --- Pickling the data for further use to prevent having to re-scrape code --- ###
+    with open('movies.pkl', 'wb') as movie_file:
+        pickle.dump([movie_names, movie_years], movie_file)
 
 
 ### --- Function to find next movie to scrape in review_scraper file --- ###
-
-
 def get_next_movie():
-    # Unpickling movie name file
+    if 'movies.pkl' not in os.listdir():
+        get_movies()
+
+    # Unpickling movie names and release
     with open('movies.pkl', 'rb') as movie_file:
         movie_names, movie_years = pickle.load(movie_file)
     
