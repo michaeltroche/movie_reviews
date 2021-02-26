@@ -4,8 +4,6 @@ from rotten_tomatoes_client import RottenTomatoesClient
 
 
 ### --- This function allows vague movie title search and provides the movie name and url --- ###
-
-
 def search_for_movie(search_name, movie_year):
     """
         Send any search term to the RT API.
@@ -26,7 +24,7 @@ def search_for_movie(search_name, movie_year):
         >>> search_for_movie('Indiana Jones Raiders of the Lost Ark')
         ('Raiders of the Lost Ark', '/m/raiders_of_the_lost_ark')
     """
-    
+
     movie_year = int(movie_year)
 
     # Provides search results for up to 5 movies
@@ -40,7 +38,8 @@ def search_for_movie(search_name, movie_year):
         else:
             n = 0
 
-    movie_name = result['movies'][n]['name']
-    url_id     = result['movies'][n]['url']
+    movie_name  = result['movies'][n]['name']
+    url_id      = result['movies'][n]['url']
+    meter_score = result['movies'][n]['meterScore']
     
-    return movie_name, url_id
+    return movie_name, url_id, meter_score
