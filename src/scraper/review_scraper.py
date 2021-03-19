@@ -1,5 +1,10 @@
 ### --- In this file, we scrape the rotten tomatoes website for user reviews --- ###
 ### --- Importing modules --- ###
+import sys
+
+sys.path.append('C:/Users/micha/Documents/Code/GitHub')
+
+
 import json
 import random
 import re
@@ -10,8 +15,8 @@ import numpy as np
 import pandas as pd
 import requests
 
-from movie_reviews.src.scraper import search_for_movie
-from movie_scraper.src.scraper import get_next_movie
+from movie_reviews.src.scraper.api_call import search_for_movie
+from movie_scraper.src.scraper.movie_scraper import get_next_movie
 
 
 ### --- get_movie_info function provides the movie id and movie name --- ###
