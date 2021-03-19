@@ -44,13 +44,10 @@ def get_next_movie():
         get_movies()
 
     # Unpickling movie names and release
-    with open('movies.pkl', 'rb') as movie_file:
+    with open('C:/Users/micha/Documents/Code/GitHub/movie_reviews/accesories/movies.pkl', 'rb') as movie_file:
         movie_names, movie_years = pickle.load(movie_file)
     
     file_count = len(os.listdir('C:/Users/micha/Documents/Code/GitHub/movie_reviews/review_dfs'))
 
     # Returns the next movie to scrape
     return movie_names[file_count], movie_years[file_count]
-
-# movie_name, movie_year = get_next_movie()
-# print(movie_name, movie_year)

@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 import requests
 
-from api_call import search_for_movie
-from movie_scraper import get_next_movie
+from movie_reviews.src.scraper import search_for_movie
+from movie_scraper.src.scraper import get_next_movie
 
 
 ### --- get_movie_info function provides the movie id and movie name --- ###
