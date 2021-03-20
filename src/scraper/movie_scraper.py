@@ -34,20 +34,23 @@ def get_movies():
 
 
     ### --- Pickling the data for further use to prevent having to re-scrape code --- ###
-    with open('C:/Users/micha/Documents/Code/GitHub/movie_reviews/accesories/movies.pkl', 'wb') as movie_file:
+    with open('./accesories/movies.pkl', 'wb') as movie_file:
         pickle.dump([movie_names, movie_years], movie_file)
 
 
 ### --- Function to find next movie to scrape in review_scraper file --- ###
 def get_next_movie():
-    if 'movies.pkl' not in os.listdir('C:/Users/micha/Documents/Code/GitHub/movie_reviews/accesories'):
+    if 'movies.pkl' not in os.listdir('./accesories'):
         get_movies()
 
     # Unpickling movie names and release
-    with open('C:/Users/micha/Documents/Code/GitHub/movie_reviews/accesories/movies.pkl', 'rb') as movie_file:
+    with open('./accesories/movies.pkl', 'rb') as movie_file:
         movie_names, movie_years = pickle.load(movie_file)
     
-    file_count = len(os.listdir('C:/Users/micha/Documents/Code/GitHub/movie_reviews/review_dfs'))
+    file_count = len(os.listdir('./review_dfs'))
 
     # Returns the next movie to scrape
     return movie_names[file_count], movie_years[file_count]
+
+# movie_name, movie_year = get_next_movie()
+# print(movie_name, movie_year)
