@@ -1,9 +1,7 @@
 ### --- In this file, we scrape the rotten tomatoes website for user reviews --- ###
 ### --- Importing modules --- ###
 import sys
-
 sys.path.append('C:/Users/micha/Documents/Code/GitHub')
-
 
 import json
 import random
@@ -16,7 +14,7 @@ import pandas as pd
 import requests
 
 from movie_reviews.src.scraper.api_call import search_for_movie
-from movie_scraper.src.scraper.movie_scraper import get_next_movie
+from movie_reviews.src.scraper.movie_scraper import get_next_movie
 
 
 ### --- get_movie_info function provides the movie id and movie name --- ###
@@ -135,7 +133,7 @@ def parse_reviews(save_name, movie_id, movie_year, meter_score):
  
     # Creating dataframe of reviews
     df = pd.DataFrame(data)
-    df.to_pickle(f'C:/Users/micha/Documents/Code/GitHub/movie_reviews/review_dfs/{save_name}.pkl')
+    df.to_pickle(f'./review_dfs/{save_name}.pkl')
     return df
 
 
@@ -150,7 +148,7 @@ if __name__ == '__main__':
         if movie_name == '':
             search_name = search_name.lower().replace(' ','_')
             df = pd.DataFrame()
-            df.to_pickle(f'C:/Users/micha/Documents/Code/GitHub/movie_reviews/review_dfs/{search_name}.pkl')
+            df.to_pickle(f'./review_dfs/{search_name}.pkl')
             continue
 
         save_name, movie_id             = get_movie_info(url_id)
