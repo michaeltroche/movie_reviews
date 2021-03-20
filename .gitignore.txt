@@ -1,4 +1,4 @@
 *.pyc
 *.pkl
-__pycache__
+__pycache__/
 *checkpoints
