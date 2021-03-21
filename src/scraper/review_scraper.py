@@ -30,7 +30,7 @@ def get_movie_info(url_id):
     movie_name = html_data['title']
     movie_name = movie_name.lower().replace(' ','_')
 
-    print(movie_name)
+    print('current movie:', movie_name)
 
     # Returning movie_id and movie_name
     return movie_name, movie_id
