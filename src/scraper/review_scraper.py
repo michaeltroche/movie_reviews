@@ -147,6 +147,7 @@ if __name__ == '__main__':
         # Can't find movie from automated search
         if movie_name == '':
             search_name = search_name.lower().replace(' ','_')
+            print(search_name)
             df = pd.DataFrame()
             df.to_pickle(f'./review_dfs/{search_name}.pkl')
             continue
