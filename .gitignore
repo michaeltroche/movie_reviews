@@ -2,5 +2,3 @@
 *.pkl
 __pycache__/
 *checkpoints
-*.code-workspace
-.vscode
