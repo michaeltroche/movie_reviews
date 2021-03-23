@@ -1,5 +1,5 @@
 # movie_reviews
-In this project I will be using sentiment analysis on on Rotten Tomatoes movie reviews for IMDB's top 100 most controversial movies. I do this in the hope to make accurate predictions on users star ratings from their corresponding text review. I will use techniques such as web-scraping, tokenization, stemming and text to sequence processing to get the review into an appropriate format for input into an LSTM neural network. 
+In this project I will be using sentiment analysis on on Rotten Tomatoes movie reviews for IMDB's top 100 most controversial movies. I do this in the hope to make accurate predictions on users star ratings from their corresponding text review. I will use techniques such as web-scraping, tokenization, stemming and text to sequence processing to get the reviews and process them into an appropriate format for input into an LSTM neural network. 
 
 ### [src](https://github.com/michaeltroche/movie_reviews/tree/main/src) folder contains all source code.
 - [scraper](https://github.com/michaeltroche/movie_reviews/tree/main/src/scraper) folder contains all code that scrapes the review data.
