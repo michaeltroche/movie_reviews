@@ -8,13 +8,60 @@ import random
 import re
 import time
 from collections import defaultdict
+from rotten_tomatoes_client import RottenTomatoesClient
 
 import numpy as np
 import pandas as pd
 import requests
 
-from movie_reviews.src.scraper.api_call import search_for_movie
 from movie_reviews.src.scraper.movie_scraper import get_next_movie
+
+### --- This function allows vague movie title search and provides the movie name and url --- ###
+def search_for_movie(search_name, movie_year):
+    """
+        Send any search term to the RT API.
+
+        Parameters
+        ----------
+        searchterm : str
+            Any string corresponding to a movie title.
+            Doesn't need to be exact
+
+        Returns
+        -------
+        tuple
+            (name : str, url : str)
+
+        Examples
+        --------
+        >>> search_for_movie('Indiana Jones Raiders of the Lost Ark')
+        ('Raiders of the Lost Ark', '/m/raiders_of_the_lost_ark')
+    """
+
+    movie_year = int(movie_year)
+
+    # Provides search results for up to 5 movies
+    result = RottenTomatoesClient.search(term=search_name, limit=5)
+    
+    if result['movieCount'] == 0:
+        movie_name = ''
+        url_id = ''
+        meter_score = 0
+        return movie_name, url_id, meter_score
+
+    # Finding exact movie by using corresponding release year
+    for i in range(len(result['movies'])):
+        if result['movies'][i]['year'] == movie_year:
+            n = i
+            break
+    else:
+        n = 0
+
+    movie_name  = result['movies'][n]['name']
+    url_id      = result['movies'][n]['url']
+    meter_score = result['movies'][n]['meterScore']
+    
+    return movie_name, url_id, meter_score
 
 
 ### --- get_movie_info function provides the movie id and movie name --- ###
