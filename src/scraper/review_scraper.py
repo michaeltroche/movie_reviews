@@ -4,10 +4,10 @@ import sys
 sys.path.append('C:/Users/micha/Documents/Code/GitHub')
 
 import json
+import os
 import random
 import re
 import time
-from collections import defaultdict
 from rotten_tomatoes_client import RottenTomatoesClient
 
 import numpy as np
@@ -16,21 +16,29 @@ import requests
 
 from movie_reviews.src.scraper.movie_scraper import get_next_movie
 
+
+
 ### --- This function allows vague movie title search and provides the movie name and url --- ###
 def search_for_movie(search_name, movie_year):
     """
-        Send any search term to the RT API.
+        search_for_movie finds basic movie info by sending non-exact movie search term to the RT API.
 
         Parameters
         ----------
         searchterm : str
-            Any string corresponding to a movie title.
-            Doesn't need to be exact
+            Any string corresponding to a movie title - doesn't need to be exact.
 
         Returns
         -------
         tuple
-            (name : str, url : str)
+            (movie_name, url_id, meter_score)
+        
+        movie_name : str
+            The name of the movie on RT.
+        url_id : str
+            The url code for the movie that allows for scraping on RT.
+        meter_score : int
+            The movie RT meter score.
 
         Examples
         --------
@@ -43,6 +51,7 @@ def search_for_movie(search_name, movie_year):
     # Provides search results for up to 5 movies
     result = RottenTomatoesClient.search(term=search_name, limit=5)
     
+    # No movies found from search
     if result['movieCount'] == 0:
         movie_name = ''
         url_id = ''
@@ -60,42 +69,85 @@ def search_for_movie(search_name, movie_year):
     movie_name  = result['movies'][n]['name']
     url_id      = result['movies'][n]['url']
     meter_score = result['movies'][n]['meterScore']
-    
+
+    movie_name = movie_name.lower().replace(' ','_')
+    print('current movie:',movie_name)
+
     return movie_name, url_id, meter_score
 
 
-### --- get_movie_info function provides the movie id and movie name --- ###
-def get_movie_info(url_id):
 
+### --- get_movie_info function provides the movie id and movie name --- ###
+def get_movie_id(url_id):
+    """
+    get_movie_id finds the unique movie id from RT.
+
+    Parameters
+    ----------
+    url_id : str
+        Used for the get request to the RT website.
+
+    Returns
+    -------
+    movie_id : str
+        Unique movie id required for scraping movie on RT.
+    """
     # Requesting the HTML documentation
     response = requests.get(f'https://www.rottentomatoes.com/{url_id}/reviews?type=user')
 
     # Searching the HTML doc to extract the movie_id
     html_data  = json.loads(re.search('movieReview\s=\s(.*);', response.text).group(1))
     movie_id   = html_data['movieId']
-    # Extracting movie_name for file saving
-    movie_name = html_data['title']
-    movie_name = movie_name.lower().replace(' ','_')
 
-    print('current movie:', movie_name)
+    return movie_id
 
-    # Returning movie_id and movie_name
-    return movie_name, movie_id
 
 
 ### --- get_reviews function flicks through the review pages --- ###
 def get_review_page(endCursor, movie_id):
+    """
+    Changes the movie review page to the next one automatically.
+
+    Parameters
+    ----------
+    endCursor : str
+        Input to change onto next review page.
+    movie_id : str
+        Unique movie id required for scraping movie on RT.
+
+    Returns
+    -------
+    reviews_page : dict
+        dictionary containing reviews from one page of RT.
+    """
     r = requests.get(f'https://www.rottentomatoes.com/napi/movie/{movie_id}/reviews/user',
     params = {
         "direction": "next",
         "endCursor": endCursor,
         "startCursor": ""
     })
-    return r.json()
+
+    reviews_page = r.json()
+    return reviews_page
+
 
 
 ### --- get_all_reviews function uses get_review_page to loop through thousands of review pages for our chosen movie --- ###
 def get_all_reviews(movie_id):
+    """
+    get_all_reviews scrapes the current movie information.
+
+    Parameters
+    ----------
+    movie_id : str
+        Unique movie id required for scraping movie on RT.
+
+    Returns
+    -------
+    reviews : list
+        contains all the review information of one movie. This includes the review, user id 
+        and user rating.
+    """
     reviews = []
     result  = {}
     
@@ -106,7 +158,7 @@ def get_all_reviews(movie_id):
             r = np.abs(np.random.randn()/3 + 1)
             time.sleep(r) #[s]
 
-            # Gathering all movie review information into list: reviews
+            # Gathering all movie review information into list, reviews
             result = get_review_page(result['pageInfo']['endCursor'] if i != 0  else '', movie_id)
             reviews.extend([t for t in result['reviews']])
 
@@ -126,14 +178,34 @@ def get_all_reviews(movie_id):
     return reviews
 
 
+
 ### --- Parsing function that obtains relevant data and puts it into a dataframe --- ###
-def parse_reviews(save_name, movie_id, movie_year, meter_score):
+def parse_reviews(movie_name, movie_id, movie_year, meter_score):
+    """
+    parses the reviews for chosen movie and saves information in a dataframe.
+
+    Parameters
+    ----------
+    movie_name : str
+        The name of the movie.
+    movie_id : str
+        Unique movie id required for scraping movie on RT.
+    movie_year : str
+        The year of release for the movie.
+    meter_score : int
+        The movie RT meter score.
+
+    Returns
+    -------
+    df : DataFrame
+        review dataframe for one movie.
+    """
     reviews = get_all_reviews(movie_id)
     N = len(reviews)
 
     data = {}
 
-    data['movie_name'] = [save_name]*N
+    data['movie_name'] = [movie_name]*N
     data['movie_year'] = [movie_year]*N
     data['meter_score'] = [meter_score]*N
 
@@ -184,23 +256,21 @@ def parse_reviews(save_name, movie_id, movie_year, meter_score):
     return df
 
 
-### --- Run Code --- ###
+
+# ### --- Run Code --- ###
 if __name__ == '__main__':
-    start = time.time()
-    for i in range(95):
-        search_name, movie_year         = get_next_movie()
+    n = 100 - len(os.listdir('./review_dfs'))
+    for i in range(n):
+        search_name, movie_year = get_next_movie()
         movie_name, url_id, meter_score = search_for_movie(search_name, movie_year)
 
         # Can't find movie from automated search
         if movie_name == '':
+            print('movie not found')
             search_name = search_name.lower().replace(' ','_')
-            print(search_name)
             df = pd.DataFrame()
             df.to_pickle(f'./review_dfs/{search_name}.pkl')
             continue
 
-        save_name, movie_id             = get_movie_info(url_id)
-        parse_reviews(save_name, movie_id, movie_year, meter_score)
-
-    end = time.time()
-    print(f'Time to run:{(start-end)/3600:.2f} hrs')
+        movie_id = get_movie_id(url_id)
+        parse_reviews(movie_name, movie_id, movie_year, meter_score)
