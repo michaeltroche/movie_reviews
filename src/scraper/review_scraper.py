@@ -252,7 +252,7 @@ def parse_reviews(movie_name, movie_id, movie_year, meter_score):
  
     # Creating dataframe of reviews
     df = pd.DataFrame(data)
-    df.to_pickle(f'./review_dfs/{save_name}.pkl')
+    df.to_pickle(f'./review_dfs/{movie_name}.pkl')
     return df
 
 
