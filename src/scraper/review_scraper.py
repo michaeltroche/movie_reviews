@@ -5,17 +5,15 @@ sys.path.append('C:/Users/micha/Documents/Code/GitHub')
 
 import json
 import os
-import random
 import re
 import time
-from rotten_tomatoes_client import RottenTomatoesClient
+
 
 import numpy as np
 import pandas as pd
 import requests
-
 from movie_reviews.src.scraper.movie_scraper import get_next_movie
-
+from rotten_tomatoes_client import RottenTomatoesClient
 
 
 ### --- This function allows vague movie title search and provides the movie name and url --- ###
@@ -53,6 +51,7 @@ def search_for_movie(search_name, movie_year):
     
     # No movies found from search
     if result['movieCount'] == 0:
+        print('movie not found')
         movie_name = ''
         url_id = ''
         meter_score = 0
@@ -68,7 +67,12 @@ def search_for_movie(search_name, movie_year):
 
     movie_name  = result['movies'][n]['name']
     url_id      = result['movies'][n]['url']
-    meter_score = result['movies'][n]['meterScore']
+    try:
+        meter_score = result['movies'][n]['meterScore']
+    except KeyError:
+        print('no meter score')
+        meter_score = 0
+        
 
     movie_name = movie_name.lower().replace(' ','_')
     print('current movie:',movie_name)
@@ -168,7 +172,7 @@ def get_all_reviews(movie_id):
             # Pausing for a minute after 10,000 reviews (100 pages)
             i += 1
             if i%1000==0:
-                print(i)
+                print(i*10,'reviews found!')
                 time.sleep(60)
         
         except requests.exceptions.RequestException:
@@ -200,6 +204,8 @@ def parse_reviews(movie_name, movie_id, movie_year, meter_score):
     df : DataFrame
         review dataframe for one movie.
     """
+    movie_name = movie_name.replace('/','_')
+
     reviews = get_all_reviews(movie_id)
     N = len(reviews)
 
@@ -265,7 +271,7 @@ if __name__ == '__main__':
         movie_name, url_id, meter_score = search_for_movie(search_name, movie_year)
 
         # Can't find movie from automated search
-        if movie_name == '':
+        if meter_score == 0:
             print('movie not found')
             search_name = search_name.lower().replace(' ','_')
             df = pd.DataFrame()
